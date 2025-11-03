@@ -223,7 +223,7 @@
 
 <!-- Audio -->
 <audio id="bgm" loop preload="auto">
-  <source src="images/song.mp3" type="audio/mpeg"/>
+  <!-- <source src="images/song.mp3" type="audio/mpeg"/> -->
 </audio>
 <audio id="tickSound" preload="auto">
   <source src="tick.mp3" type="audio/mpeg"/>
@@ -501,6 +501,28 @@ let celebrationStarted = false;
 
 // Set countdown to start from 5 seconds
 let countdownSeconds = 5;
+let tickSoundPlaying = false;
+
+function startTickSound() {
+  if (!tickSoundPlaying) {
+    tickSound.loop = true;
+    tickSound.play().then(() => {
+      tickSoundPlaying = true;
+      console.log("Tick sound started");
+    }).catch(e => {
+      console.log("Tick sound failed to start:", e);
+    });
+  }
+}
+
+function stopTickSound() {
+  if (tickSoundPlaying) {
+    tickSound.pause();
+    tickSound.currentTime = 0;
+    tickSoundPlaying = false;
+    console.log("Tick sound stopped");
+  }
+}
 
 function updateClock() {
   // Update the countdown time
@@ -509,11 +531,10 @@ function updateClock() {
   // Update clock display
   clockTime.textContent = countdownSeconds;
   
-  // Play tick sound on every second change
-  try {
-    tickSound.currentTime = 0;
-    tickSound.play();
-  } catch(e) {}
+  // Start tick sound on first countdown if not already playing
+  if (countdownSeconds === 4 && !tickSoundPlaying) {
+    startTickSound();
+  }
   
   // Check if countdown has reached zero
   if (countdownSeconds <= 0) {
@@ -528,39 +549,23 @@ function updateClock() {
 }
 
 function celebrateBirthday() {
+  // Stop tick sound first
+  stopTickSound();
+  
   // Hide clock
   clockOverlay.style.transition = 'opacity .45s ease';
   clockOverlay.style.opacity = '0';
   setTimeout(()=>{ clockOverlay.style.display='none'; }, 460);
   
-  // Stop the tick sound
-  try {
-    tickSound.pause();
-    tickSound.currentTime = 0;
-  } catch(e) {}
-  
   // Show birthday message
   birthdayMessage.classList.add('show');
+  
+  // Play cheer sound automatically when timer ends
+  playCheerSound();
   
   // Start celebration effects
   createConfetti();
   createBalloons();
-  
-  // Play cheer sound automatically when timer ends
-  try{ 
-    cheerSfx.currentTime = 0;
-    cheerSfx.play().then(() => {
-      console.log("Cheer sound started successfully");
-    }).catch(error => {
-      console.log("Cheer sound failed to play:", error);
-      // Try again with user interaction fallback
-      document.addEventListener('click', () => {
-        cheerSfx.play().catch(e => console.log("Cheer sound still failed:", e));
-      }, { once: true });
-    });
-  } catch(e){
-    console.log("Error playing cheer sound:", e);
-  }
   
   // enable typewriter + celebratory fireworks
   typingEnabled = true;
@@ -593,9 +598,31 @@ function celebrateBirthday() {
   }, 2000);
 }
 
-// Start the clock
-countdownInterval = setInterval(updateClock, 1000);
-updateClock(); // Initialize immediately
+function playCheerSound() {
+  try{ 
+    cheerSfx.currentTime = 0;
+    cheerSfx.play().then(() => {
+      console.log("Cheer sound started successfully");
+    }).catch(error => {
+      console.log("Cheer sound failed to play:", error);
+      // Try again with user interaction fallback
+      document.addEventListener('click', () => {
+        cheerSfx.play().catch(e => console.log("Cheer sound still failed:", e));
+      }, { once: true });
+    });
+  } catch(e){
+    console.log("Error playing cheer sound:", e);
+  }
+}
+
+// Start the clock immediately when page loads
+window.addEventListener('load', () => {
+  countdownInterval = setInterval(updateClock, 1000);
+  updateClock(); // Initialize immediately
+  
+  // Start tick sound right away
+  startTickSound();
+});
 
 /* ---------- Music autoplay with fallback overlay ---------- */
 const bgm = document.getElementById('bgm');
@@ -631,6 +658,7 @@ function stopAllAudio(){
   [bgm, tickSound, cheerSfx].forEach(a=>{
     try{ a.pause(); a.currentTime = 0; }catch(e){}
   });
+  tickSoundPlaying = false;
 }
 window.addEventListener('pagehide', stopAllAudio, {capture:true});
 window.addEventListener('beforeunload', stopAllAudio);
@@ -648,9 +676,9 @@ document.querySelectorAll('audio').forEach(audio => {
   });
 });
 
+// Try to play background music when page loads
 window.addEventListener('load', ()=>{
   tryPlayMusic();
-  updateClock(); // Initialize clock immediately
 });
 </script>
 </body>

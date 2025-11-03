@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Memories</title>
+<style>
+  body {
+    margin: 0;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-family: 'Arial', sans-serif;
+    background: #000;
+  }
+
+  #threejs-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+  }
+
+  .title {
+    font-size: 2.5rem;
+    margin-bottom: 30px;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    color: #fff;
+    z-index: 10;
+  }
+
+  .carousel {
+    position: relative;
+    width: 600px;
+    height: 600px;
+    perspective: 1000px;
+    margin: 50px 0;
+    z-index: 1;
+  }
+
+  .carousel img {
+    position: absolute;
+    width: 250px;
+    height: 250px;
+    object-fit: cover;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    filter: brightness(1.05) contrast(1.05);
+    border: 3px solid rgba(255,255,255,0.7);
+    opacity: 0;
+    transform-style: preserve-3d;
+    transform-origin: center center;
+  }
+
+  /* Shape variations */
+  .carousel img.circular {
+    border-radius: 50%;
+    clip-path: circle(50% at 50% 50%);
+  }
+
+  .carousel img.square {
+    border-radius: 15px;
+    clip-path: inset(0 0 0 0 round 15px);
+  }
+
+  .carousel img.irregular {
+    border-radius: 15px;
+    clip-path: polygon(
+      0% 15%, 15% 0%, 85% 0%, 100% 15%,
+      100% 85%, 85% 100%, 15% 100%, 0% 85%
+    );
+  }
+
+  .controls {
+    display: flex;
+    gap: 20px;
+    z-index: 10;
+    margin-top: 30px;
+  }
+
+  .btn {
+    background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+    border: none;
+    color: white;
+    padding: 12px 30px;
+    border-radius: 30px;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(255,107,107,0.4);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(255,107,107,0.6);
+  }
+
+  .btn:active {
+    transform: translateY(1px);
+  }
+
+  .btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255,255,255,0.4),
+      transparent
+    );
+    transition: 0.5s;
+  }
+
+  .btn:hover::after {
+    left: 100%;
+  }
+
+  #nextBtn {
+    background: linear-gradient(45deg, #74b9ff, #0984e3);
+  }
+
+  #nextBtn:hover {
+    box-shadow: 0 8px 20px rgba(116,185,255,0.6);
+  }
+
+  .stars {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .star {
+    position: absolute;
+    background-color: white;
+    border-radius: 50%;
+    animation: twinkle 3s infinite alternate;
+  }
+
+  @keyframes twinkle {
+    0% { opacity: 0.2; transform: scale(0.8); }
+    50% { opacity: 0.8; }
+    100% { opacity: 0.2; transform: scale(1.1); }
+  }
+
+  .flower-rain {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .flower {
+    position: absolute;
+    font-size: 20px;
+    animation: falling linear infinite;
+    opacity: 0.7;
+  }
+
+  @keyframes falling {
+    0% {
+      transform: translateY(-10vh) rotate(0deg);
+      opacity: 0;
+    }
+    10% {
+      opacity: 0.7;
+    }
+    90% {
+      opacity: 0.7;
+    }
+    100% {
+      transform: translateY(110vh) rotate(360deg);
+      opacity: 0;
+    }
+  }
+
+  .music-control {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 20;
+    background: rgba(255,255,255,0.2);
+    border: none;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(5px);
+    transition: all 0.3s ease;
+  }
+
+  .music-control:hover {
+    background: rgba(255,255,255,0.3);
+    transform: scale(1.1);
+  }
+</style>
+</head>
+<body>
+<h1 class="title"></h1>
+
+<div id="threejs-container"></div>
+<div class="stars" id="stars"></div>
+<div class="flower-rain" id="flowerRain"></div>
+
+<div class="carousel" id="carousel">
+  <img src="images/img1.jpg" alt="Our Second meet at Matri chaya" />
+  <img src="images/img2.jpg" alt="My favourite one" />
+  <img src="images/img3.jpg" alt="" />
+  <img src="images/img4.jpg" alt="" />
+  <img src="images/img5.jpg" alt="" />
+  <img src="images/img6.jpg" alt="" />
+  <img src="images/img7.jpg" alt="" />
+  <img src="images/img8.jpg" alt="" />
+  <img src="images/img19.jpg" alt="" />
+  <img src="images/img9.jpg" alt="" />
+  <img src="images/img10.jpg" alt="" />
+  <img src="images/img11.jpg" alt="" />
+  <img src="images/img17.jpg" alt="" />
+  <img src="images/img13.jpg" alt="" />
+  <img src="images/img14.jpg" alt="" />
+  <img src="images/img15.jpg" alt="" />
+  <img src="images/img16.jpg" alt="" />
+  <img src="images/img17.jpg" alt="" />
+  <img src="images/img18.jpg" alt="" />
+</div>
+
+<div class="controls">
+  <button class="btn" onclick="navigateTo('index.html')">Home</button>
+  <button class="btn" onclick="navigateTo('page2.html')">Back</button>
+  <button id="nextBtn" class="btn" onclick="navigateTo('page4.html')">Next</button>
+</div>
+
+<!-- Music control button -->
+<button id="musicControl" class="music-control" aria-label="Toggle music">🔊</button>
+
+<audio id="bgMusic" loop preload="auto">
+  <source src="images/song.mp3" type="audio/mpeg" />
+</audio>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+  // ==================== 3D Heart Animation Background ====================
+  let scene, camera, renderer, heart, particles, clock;
+  let mouseX = 0, mouseY = 0;
+  let windowHalfX = window.innerWidth / 2;
+  let windowHalfY = window.innerHeight / 2;
+  
+  function init() {
+    // Create scene
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x000000);
+    
+    // Create camera
+    camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 2000);
+    camera.position.z = 150;
+    
+    // Create renderer
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0x000000, 0);
+    document.getElementById('threejs-container').appendChild(renderer.domElement);
+    
+    // Create heart geometry
+    const heartShape = new THREE.Shape();
+    const x = 0, y = 0;
+    heartShape.moveTo(x + 5, y + 5);
+    heartShape.bezierCurveTo(x + 5, y + 5, x + 4, y, x, y);
+    heartShape.bezierCurveTo(x - 6, y, x - 6, y + 7, x - 6, y + 7);
+    heartShape.bezierCurveTo(x - 6, y + 11, x - 3, y + 15.4, x + 5, y + 19);
+    heartShape.bezierCurveTo(x + 12, y + 15.4, x + 16, y + 11, x + 16, y + 7);
+    heartShape.bezierCurveTo(x + 16, y + 7, x + 16, y, x + 10, y);
+    heartShape.bezierCurveTo(x + 7, y, x + 5, y + 5, x + 5, y + 5);
+    
+    const extrudeSettings = {
+      steps: 2,
+      depth: 4,
+      bevelEnabled: true,
+      bevelThickness: 1,
+      bevelSize: 1,
+      bevelOffset: 0,
+      bevelSegments: 1
+    };
+    
+    const heartGeometry = new THREE.ExtrudeGeometry(heartShape, extrudeSettings);
+    
+    // Pink heart material
+    const heartMaterial = new THREE.MeshPhongMaterial({
+      color: 0xff6b6b,
+      specular: 0xffb6c1,
+      shininess: 100,
+      flatShading: true,
+      transparent: true,
+      opacity: 0.8,
+    });
+    
+    heart = new THREE.Mesh(heartGeometry, heartMaterial);
+    heart.scale.set(2.5, 2.5, 2.5);
+    scene.add(heart);
+    
+    // Create colorful particles
+    const particleCount = 1500;
+    particles = new THREE.BufferGeometry();
+    const positions = new Float32Array(particleCount * 3);
+    const colors = new Float32Array(particleCount * 3);
+    const sizes = new Float32Array(particleCount);
+    
+    const colorPalette = [
+      new THREE.Color(0xff6b6b),
+      new THREE.Color(0xffcccb),
+      new THREE.Color(0xffb6c1),
+      new THREE.Color(0xff8e8e),
+      new THREE.Color(0x74b9ff),
+      new THREE.Color(0x55efc4),
+      new THREE.Color(0xfdcb6e)
+    ];
+    
+    for (let i = 0; i < particleCount; i++) {
+      positions[i * 3] = (Math.random() - 0.5) * 1000;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 1000;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 1000;
+      
+      const color = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+      colors[i * 3] = color.r;
+      colors[i * 3 + 1] = color.g;
+      colors[i * 3 + 2] = color.b;
+      
+      sizes[i] = 1 + Math.random() * 3;
+    }
+    
+    particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    particles.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    particles.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+    
+    const particleMaterial = new THREE.PointsMaterial({
+      size: 3,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.8,
+      blending: THREE.AdditiveBlending,
+      sizeAttenuation: true
+    });
+    
+    const particleSystem = new THREE.Points(particles, particleMaterial);
+    scene.add(particleSystem);
+    
+    // Add soft pink ambient light
+    const ambientLight = new THREE.AmbientLight(0xfff0f5, 0.5);
+    scene.add(ambientLight);
+    
+    // Add directional light for heart highlights
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    directionalLight.position.set(1, 1, 1).normalize();
+    scene.add(directionalLight);
+    
+    // Add point lights for sparkle effect
+    const pointLight1 = new THREE.PointLight(0xff6b6b, 2, 50);
+    pointLight1.position.set(20, 20, 20);
+    scene.add(pointLight1);
+    
+    const pointLight2 = new THREE.PointLight(0x74b9ff, 2, 50);
+    pointLight2.position.set(-20, -20, 20);
+    scene.add(pointLight2);
+    
+    // Handle window resize
+    window.addEventListener('resize', onWindowResize);
+    
+    // Track mouse movement
+    document.addEventListener('mousemove', onDocumentMouseMove);
+    
+    clock = new THREE.Clock();
+    animate();
+  }
+  
+  function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    windowHalfX = window.innerWidth / 2;
+    windowHalfY = window.innerHeight / 2;
+  }
+  
+  function onDocumentMouseMove(event) {
+    mouseX = (event.clientX - windowHalfX) * 0.05;
+    mouseY = (event.clientY - windowHalfY) * 0.05;
+  }
+  
+  function animate() {
+    requestAnimationFrame(animate);
+    render();
+  }
+  
+  function render() {
+    const delta = clock.getDelta();
+    
+    heart.rotation.x += 0.002;
+    heart.rotation.y += 0.003;
+    heart.rotation.z += 0.0015;
+    
+    camera.position.x += (mouseX - camera.position.x) * 0.05;
+    camera.position.y += (-mouseY - camera.position.y) * 0.05;
+    camera.lookAt(scene.position);
+    
+    // Gentle pulsing effect
+    heart.scale.x = 2.5 + Math.sin(Date.now() * 0.001) * 0.1;
+    heart.scale.y = 2.5 + Math.sin(Date.now() * 0.001) * 0.1;
+    
+    renderer.render(scene, camera);
+  }
+
+  // Initialize Three.js scene
+  init();
+
+  // ==================== Enhanced Photo Carousel with Shape Variations ====================
+  const images = document.querySelectorAll(".carousel img");
+  const total = images.length;
+  let currentIndex = 0;
+  const directions = [
+    { x: -800, y: 0, z: 0, rotateY: -45 },    // left
+    { x: 800, y: 0, z: 0, rotateY: 45 },     // right
+    { x: 0, y: -800, z: 0, rotateX: -45 },    // top
+    { x: 0, y: 800, z: 0, rotateX: 45 },     // bottom
+    { x: 0, y: 0, z: -800, scale: 0.3 },    // back
+    { x: -600, y: -600, z: 0, rotateX: -30, rotateY: -30 }, // top-left
+    { x: 600, y: -600, z: 0, rotateX: -30, rotateY: 30 },  // top-right
+    { x: -600, y: 600, z: 0, rotateX: 30, rotateY: -30 },  // bottom-left
+    { x: 600, y: 600, z: 0, rotateX: 30, rotateY: 30 },   // bottom-right
+    { x: -600, y: 0, z: -600, rotateY: -30, scale: 0.4 }, // back-left
+    { x: 600, y: 0, z: -600, rotateY: 30, scale: 0.4 }   // back-right
+  ];
+
+  // Assign random shapes to all images initially
+  images.forEach(img => {
+    const shapeClass = getRandomShape();
+    img.classList.add(shapeClass);
+  });
+
+  function getRandomShape() {
+    const shapes = ['circular', 'square', 'irregular'];
+    return shapes[Math.floor(Math.random() * shapes.length)];
+  }
+
+  function showNextImage() {
+    // Hide all images first
+    images.forEach(img => {
+      img.style.opacity = '0';
+      img.style.transform = 'translateZ(0) scale(1) rotateX(0) rotateY(0)';
+      img.style.transition = 'none';
+    });
+    
+    // Get random direction (but not repeating the same direction twice in a row)
+    let directionIndex;
+    do {
+      directionIndex = Math.floor(Math.random() * directions.length);
+    } while (directionIndex === currentIndex && total > 1);
+    
+    const direction = directions[directionIndex];
+    
+    // Show current image with animation
+    const currentImg = images[currentIndex];
+    
+    // Randomly change shape sometimes (30% chance)
+    if (Math.random() < 0.3) {
+      currentImg.classList.remove('circular', 'square', 'irregular');
+      currentImg.classList.add(getRandomShape());
+    }
+    
+    // Set initial position with rotation and scale
+    let initialTransform = `translate3d(${direction.x}px, ${direction.y}px, ${direction.z}px)`;
+    if (direction.rotateX) initialTransform += ` rotateX(${direction.rotateX}deg)`;
+    if (direction.rotateY) initialTransform += ` rotateY(${direction.rotateY}deg)`;
+    if (direction.scale) initialTransform += ` scale(${direction.scale})`;
+    
+    currentImg.style.transform = initialTransform;
+    currentImg.style.opacity = '1';
+    currentImg.style.transition = 'none';
+    
+    // Force reflow to ensure initial state is applied
+    currentImg.offsetHeight;
+    
+    // Animate to center with bounce effect (within 30% radius)
+    currentImg.style.transition = 'all 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+    
+    // Calculate random position within 30% radius from center
+    const radius = 180 * 0.3; // 30% of the image size
+    const randomX = (Math.random() * 2 - 1) * radius;
+    const randomY = (Math.random() * 2 - 1) * radius;
+    
+    currentImg.style.transform = `translate3d(${randomX}px, ${randomY}px, 0) rotateX(0) rotateY(0) scale(1.1)`;
+    
+    // After reaching center, start moving out with slight scale up
+    setTimeout(() => {
+      currentImg.style.transition = 'all 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+      currentImg.style.transform = `translate3d(${-direction.x * 0.3}px, ${-direction.y * 0.3}px, ${-direction.z * 0.3}px) scale(0.8)`;
+      if (direction.rotateX) currentImg.style.transform += ` rotateX(${-direction.rotateX * 0.3}deg)`;
+      if (direction.rotateY) currentImg.style.transform += ` rotateY(${-direction.rotateY * 0.3}deg)`;
+      currentImg.style.opacity = '0';
+    }, 2500);
+    
+    // Move to next image
+    currentIndex = (currentIndex + 1) % total;
+    
+    // Schedule next image
+    setTimeout(showNextImage, 4000);
+  }
+  
+  // Start the animation
+  setTimeout(showNextImage, 500);
+
+  // ==================== Star Animation ====================
+  function createStars() {
+    const starsContainer = document.getElementById('stars');
+    const starCount = 300;
+    
+    for (let i = 0; i < starCount; i++) {
+      const star = document.createElement('div');
+      star.className = 'star';
+      const size = 0.5 + Math.random() * 2;
+      star.style.width = `${size}px`;
+      star.style.height = `${size}px`;
+      star.style.left = `${Math.random() * 100}vw`;
+      star.style.top = `${Math.random() * 100}vh`;
+      star.style.animationDelay = `${Math.random() * 3}s`;
+      star.style.animationDuration = `${2 + Math.random() * 4}s`;
+      starsContainer.appendChild(star);
+    }
+  }
+
+  // ==================== Flower Rain Animation ====================
+  function createFlowerRain() {
+    const flowerRain = document.getElementById('flowerRain');
+    const flowerTypes = ['🌸', '🌹', '🌺', '🌻', '🥸', '🌷', '🥳', '🏵️'];
+    const flowerCount = 50;
+    
+    for (let i = 0; i < flowerCount; i++) {
+      const flower = document.createElement('div');
+      flower.className = 'flower';
+      flower.textContent = flowerTypes[Math.floor(Math.random() * flowerTypes.length)];
+      flower.style.left = `${Math.random() * 100}vw`;
+      flower.style.animationDuration = `${5 + Math.random() * 10}s`;
+      flower.style.animationDelay = `${Math.random() * 5}s`;
+      flower.style.fontSize = `${15 + Math.random() * 20}px`;
+      flowerRain.appendChild(flower);
+    }
+  }
+
+  // ==================== Music Handling ====================
+  const bgMusic = document.getElementById('bgMusic');
+  const musicControl = document.getElementById('musicControl');
+  let isMusicPlaying = false;
+
+  function navigateTo(page) {
+    // Stop music when navigating away
+    bgMusic.pause();
+    bgMusic.currentTime = 0;
+    window.location.href = page;
+  }
+
+  function toggleMusic() {
+    if (isMusicPlaying) {
+      bgMusic.pause();
+      musicControl.textContent = '🔇';
+    } else {
+      bgMusic.play().then(() => {
+        musicControl.textContent = '🔊';
+      }).catch(e => {
+        console.log("Music playback failed:", e);
+      });
+    }
+    isMusicPlaying = !isMusicPlaying;
+  }
+
+  // Try to play music when page loads
+  window.addEventListener('load', () => {
+    createStars();
+    createFlowerRain();
+    
+    // Try to auto-play music immediately
+    tryPlayMusic();
+  });
+
+  function tryPlayMusic() {
+    // Set volume to a reasonable level
+    bgMusic.volume = 0.7;
+    
+    // Try to play the music
+    const playPromise = bgMusic.play();
+    
+    if (playPromise !== undefined) {
+      playPromise.then(() => {
+        isMusicPlaying = true;
+        musicControl.textContent = '🔊';
+        console.log("Music started successfully");
+      }).catch(error => {
+        // If auto-play fails, set up manual play on user interaction
+        console.log("Auto-play failed, waiting for user interaction");
+        isMusicPlaying = false;
+        musicControl.textContent = '🔇';
+        
+        // Try to play on any user interaction
+        const playOnInteraction = () => {
+          if (!isMusicPlaying) {
+            bgMusic.play().then(() => {
+              isMusicPlaying = true;
+              musicControl.textContent = '🔊';
+              console.log("Music started after user interaction");
+            }).catch(e => {
+              console.log("Music playback failed even after interaction:", e);
+            });
+          }
+          // Remove the event listener after first interaction
+          document.removeEventListener('click', playOnInteraction);
+        };
+        
+        document.addEventListener('click', playOnInteraction);
+      });
+    }
+  }
+
+  // Stop music when page/tab is closed or changed
+  window.addEventListener('beforeunload', () => {
+    bgMusic.pause();
+    bgMusic.currentTime = 0;
+  });
+
+  // Stop music when page is hidden (tab switch)
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      bgMusic.pause();
+    } else if (isMusicPlaying) {
+      bgMusic.play().catch(e => console.log("Resuming music failed:", e));
+    }
+  });
+
+  // Add click event to music control button
+  musicControl.addEventListener('click', toggleMusic);
+</script>
+</body>
+</html>

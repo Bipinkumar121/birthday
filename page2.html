@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Page 2 — Shayari Envelopes</title>
+<style>
+  :root{
+    --accent:#ff4b5c;
+    --bg1:#8f41a4;
+    --bg2:#7a3b80;
+  }
+  html,body{height:100%;margin:0;font-family:Poppins,system-ui,Arial; background:linear-gradient(120deg,#0b1220 0%, #20132b 100%); color:#fff;font-size: xx-large; overflow-x:hidden}
+  
+  /* --- Circular Photo Carousel Background --- */
+  .carousel-wrap{
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .carousel-container {
+    position: relative;
+    width: 1000px;
+    height: 600px;
+    perspective: 2000px;
+  }
+  
+  .carousel {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    animation: rotateCarousel 13s linear infinite;
+  }
+  
+  .carousel .card {
+    position: absolute;
+    display: flex; 
+    justify-content: center;
+    align-items: center;
+    width: 200px;
+    height: 250px;
+    left: 50%;
+    top: 50%;
+    margin-left: -140px;
+    margin-top: -90px;
+    background-size:contain;
+    background-position: center;
+    border-radius: 10px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+    transform-style: preserve-3d;
+    transition: transform 0.5s ease;
+    backface-visibility: hidden;
+  }
+  
+  .nav-btn {
+    font-size: 22px;
+    padding: 14px 28px;
+    border-radius: 17px;
+    background-color: #ff69b4;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+
+  .nav-btn:hover {
+    background-color: #ff1493;
+    transform: scale(1.05);
+  }
+  
+  @keyframes rotateCarousel {
+    from { transform: rotateY(0deg); }
+    to { transform: rotateY(360deg); }
+  }
+
+  /* overlay to darken & add subtle vignette */
+  .overlay {
+    position:fixed;inset:0;z-index:0;pointer-events:none;
+    background: radial-gradient(ellipse at center, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.5) 70%);
+    mix-blend-mode: multiply;
+  }
+  
+  .btn {
+    background: linear-gradient(45deg, #ffb6c1, #ff69b4);
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(255, 105, 180, 0.5);
+    transition: all 0.3s ease;
+  }
+
+  .btn:hover {
+    background: linear-gradient(45deg, #ff69b4, #ff1493);
+    box-shadow: 0 6px 15px rgba(255, 20, 147, 0.6);
+    transform: scale(1.05) rotate(-2deg);
+  }
+
+  .btn:active {
+    transform: scale(0.95);
+  }
+  
+  /* Stars effect */
+  .stars {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .star {
+    position: absolute;
+    background-color: rgba(225, 141, 141, 0.8);
+    border-radius: 50%;
+    animation: twinkle 4s infinite alternate;
+  }
+
+  @keyframes twinkle {
+    0% { opacity: 0.2; transform: scale(0.8); }
+    50% { opacity: 0.8; }
+    100% { opacity: 0.2; transform: scale(1.1); }
+  }
+
+  /* Rain effect */
+  .raindrops {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .raindrop {
+    position: absolute;
+    width: 2px;
+    background: linear-gradient(to bottom, transparent,);
+    animation: rain 10s linear infinite;
+  }
+  
+  .shayari-card {
+    margin-bottom: 15px;
+    text-align: center;
+    width: 90%;
+    max-width: 600px;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .controls {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 30px;
+    width: 100%;
+    position: fixed;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    z-index: 10;
+  }
+
+  .my {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 30px;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  @keyframes rain {
+    0% { transform: translateY(-100vh); }
+    100% { transform: translateY(100vh); }
+  }
+
+  /* --- main UI area --- */
+  .ui {
+    position:relative; 
+    z-index:2;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-start;
+    min-height:100vh; 
+    padding:40px 20px;
+    overflow-x: hidden;
+  }
+
+  .title {
+    font-size: 0.6rem;
+    margin-top: 0vh;
+    margin-bottom: 18px;
+    letter-spacing: 6.8px;
+    text-align: center;
+  }
+
+  /* container for envelope & shayari */
+  .stage {
+    width: 90%; 
+    max-width:600px; 
+    min-height:200px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+
+  /* center card that holds shown shayari */
+  .shayari-card {
+    width:100%; 
+    min-height: 200px;
+    border-radius: 18px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    padding: 40px 30px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    text-align: center;
+    color: #fff;
+    backdrop-filter: blur(6px);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Old Letter Animation */
+  .letter-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    perspective: 1000px;
+  }
+
+  .letter {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: #f8f1e5;
+    color: #333;
+    padding: 30px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    transform-style: preserve-3d;
+    transform-origin: top center;
+    transform: rotateX(90deg);
+    animation: openLetter 1.5s ease-out forwards;
+    border: 1px solid #d4c9b8;
+    font-family: 'Courier New', Courier, monospace;
+    line-height: 1.6;
+  }
+
+  @keyframes openLetter {
+    0% { transform: rotateX(90deg); opacity: 0; }
+    100% { transform: rotateX(0deg); opacity: 1; }
+  }
+
+  .letter::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 10px;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.1), transparent);
+  }
+
+  .letter::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 10px;
+    background: linear-gradient(to top, rgba(0,0,0,0.1), transparent);
+  }
+
+  /* music area */
+  .music-area { 
+    margin-top: 20px; 
+    width: 100%; 
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    gap: 14px; 
+  }
+  
+  .music-panel { 
+    width: 90%; 
+    max-width:500px;
+    padding:18px; 
+    border-radius:14px; 
+    display:flex; 
+    align-items:center; 
+    justify-content:center; 
+    gap:12px; 
+    border:1px solid rgba(255,255,255,0.04); 
+    margin: 0 auto;
+    flex-wrap: wrap;
+  }
+  
+  .music-controls { 
+    display:flex; 
+    gap:10px; 
+    align-items:center; 
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  /* hearts animation container (hidden until music plays) */
+  .hearts {
+    position: absolute; 
+    inset:0;
+    z-index:1; 
+    pointer-events:none;
+  }
+  
+  .heart {
+    position:absolute; 
+    width:18px; 
+    height:18px; 
+    background: radial-gradient(circle at 30% 30%, #fff 0%, #ff7aa2 30%, #ff3d6e 100%);
+    transform: rotate(-45deg);
+    border-radius:3px 12px 12px 12px;
+    opacity:0; 
+    will-change:transform,opacity;
+    animation: floatUp 4s linear infinite;
+  }
+  
+  @keyframes floatUp {
+    0% { transform: translateY(0) scale(0.8) rotate(-45deg); opacity:0; }
+    10% { opacity:1; }
+    80% { opacity:0.9; }
+    100% { transform: translateY(-520px) scale(1.25) rotate(-45deg); opacity:0; }
+  }
+
+  /* final nav buttons shown after music ends */
+  .final-nav { 
+    display: flex; 
+    gap:12px; 
+    margin-top:20px;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+  }
+  
+  .final-nav .btn { 
+    background:#3aa0ff;
+    width: auto;
+    min-width: 150px;
+    margin: 5px;
+  }
+
+  /* Quiz Section Styles */
+  .quiz-container {
+    display: none;
+    width: 90%;
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+    border-radius: 18px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(6px);
+  }
+
+  .quiz-title {
+    font-size: 1.2rem;
+    text-align: center;
+    margin-bottom: 20px;
+    color: #ff69b4;
+  }
+
+  .question {
+    font-size: 0.8rem;
+    margin-bottom: 15px;
+    line-height: 1.4;
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .option {
+    padding: 12px 15px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .option:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateX(5px);
+  }
+
+  .option.selected {
+    background: rgba(255, 105, 180, 0.3);
+    border-color: #ff69b4;
+  }
+
+  .quiz-btn {
+    background: linear-gradient(45deg, #ff69b4, #ff1493);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 0.7rem;
+    margin-top: 15px;
+    transition: all 0.3s ease;
+  }
+
+  .quiz-btn:hover {
+    transform: scale(1.05);
+  }
+
+  .quiz-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .result-message {
+    text-align: center;
+    font-size: 0.9rem;
+    margin: 20px 0;
+    min-height: 50px;
+  }
+
+  .score-display {
+    font-size: 0.8rem;
+    text-align: center;
+    margin-bottom: 15px;
+    color: #ff69b4;
+  }
+
+  /* responsive tweaks */
+  @media (max-width:760px){
+    .carousel-container { width: 700px; height: 400px; }
+    .carousel .card{ width:220px; height:140px; margin-left: -110px; margin-top: -70px; }
+    .shayari-card{ font-size:1rem; padding:20px }
+    .title { font-size: 0.5rem; }
+    .btn, .nav-btn { font-size: 16px; padding: 10px 20px; }
+    .quiz-title { font-size: 1rem; }
+    .question { font-size: 0.7rem; }
+    .letter { padding: 15px; }
+  }
+
+</style>
+</head>
+<body>
+
+<!-- rotating circular photo carousel background -->
+<div class="carousel-wrap" aria-hidden="true">
+  <div class="carousel-container">
+    <div class="carousel" id="carousel">
+      <!-- 10 placeholder cards -->
+      <div class="card" style="background-image:url('images/img1.jpg')"></div>
+      <div class="card" style="background-image:url('images/img2.jpg')"></div>
+      <div class="card" style="background-image:url('images/img3.jpg')"></div>
+      <div class="card" style="background-image:url('images/img1.jpg')"></div>
+      <div class="card" style="background-image:url('images/img2.jpg')"></div>
+      <div class="card" style="background-image:url('images/img1.jpg')"></div>
+      <div class="card" style="background-image:url('images/img3.jpg')"></div>
+      <div class="card" style="background-image:url('images/img2.jpg')"></div>
+      <div class="card" style="background-image:url('images/img1.jpg')"></div>
+      <div class="card" style="background-image:url('images/img2.jpg')"></div>
+      <div class="card" style="background-image:url('images/img3.jpg')"></div>
+      <div class="card" style="background-image:url('images/img2.jpg')"></div>
+      <div class="card" style="background-image:url('images/img3.jpg')"></div>
+      <div class="card" style="background-image:url('images/img1.jpg')"></div>
+      <div class="card" style="background-image:url('images/img2.jpg')"></div>
+      <div class="card" style="background-image:url('images/img3.jpg')"></div>
+    </div>
+  </div>
+</div>
+<div class="overlay"></div>
+<div class="stars" id="stars"></div>
+<div class="raindrops" id="raindrops"></div>
+
+<div class="ui">
+    <h2 class="title">....🥳🥸🥸🥸🥳....</h2>
+    
+    <div class="stage" id="stage">
+        <!-- Shayari card -->
+        <div class="shayari-card" id="shayariCard">
+            <div class="letter-container">
+                <div class="letter">Click Open to reveal</div>
+            </div>
+        </div>
+        
+        <!-- Quiz Container -->
+        <div class="quiz-container" id="quizContainer">
+          <!--  -->
+            <h3 class="quiz-title">Let us check how much you know me</h3>
+            <div class="question" id="questionText"></div>
+            <div class="options" id="optionsContainer"></div>
+            <div class="score-display" id="scoreDisplay">Score: 0/3</div>
+            <div class="result-message" id="resultMessage"></div>
+            <button class="quiz-btn" id="nextQuestionBtn" disabled>Next Question</button>
+            <button class="quiz-btn" id="submitQuizBtn" style="display:none;">Submit Quiz</button>
+            <button class="quiz-btn" id="retryBtn" style="display:none;">Try Again</button>
+        </div>
+        
+        <div class="my">
+            <div class="controls" id="controls">
+                <button class="btn" id="prevBtn" disabled>Previous</button>
+                <button class="btn" id="nextBtn">Open</button>
+            </div>
+            
+            <!-- Music area -->
+            <div class="music-area" id="musicArea" style="display:none;">
+                <div class="music-panel">
+                    <div class="music-controls">
+                        <!-- <button class="btn" id="playMusicBtn">Play🥳</button> -->
+                        <!-- <button class="btn" id="stopMusicBtn">Stop</button> -->
+                        <audio id="audio" src="images/song.mp3" preload="auto"></audio>
+                    </div>
+                </div>
+                
+                <!-- hearts animation container -->
+                <div class="hearts" id="hearts"></div>
+                
+                <!-- final nav -->
+                <div class="final-nav" id="finalNav">
+                    <button class="nav-btn" onclick="location.href='page3.html'">Memories</button>
+                    <button class="nav-btn" onclick="location.href='index.html'">Back</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+/* ========== Data ========== */
+const shayaris = [
+  "Happy Birthday! You're not getting older… just upgrading to a more advanced version of drama queen 🎭🎂",
+  "Congratulations! You've officially survived another year of my nonsense 😂",
+  "Happy Birthday! May your selfies always be perfect and your Wi-Fi never slow 📸📶",
+  "Here's to another year of stealing my food and blaming me for your bad jokes 🍕😜",
+  "Happy Birthday! Don't worry, you're still younger than you will be next year 😏",
+  "Wishing you a day as fabulous as your Instagram stories (and as real as your filters 😆)",
+  "Another year older, but let's be honest… mentally we're still 12 🤪",
+  "On your birthday, remember — cake calories don't count, but I'm still eating the biggest piece 🍰",
+  "Cheers to the birthday girl who's proof that laughter really does cause wrinkles… just kidding, you still look 99 😁"
+];
+
+/* ========== Quiz Data ========== */
+const quizQuestions = [
+  {
+    question: "WheN we meet first time?",
+    options: ["CLASS 6", "CLASS 3", "CLASS 1", "CLASS 7"],
+    correctAnswer: 2
+  },
+  {
+    question: "When we became friend?",
+    options: ["CLASS 6", "CLASS 3", "CLASS 1", "CLASS 7"],
+    correctAnswer: 3 // Mmma
+  },
+  {
+    question: "If you have to choose between me and Vanshika, whom will you choose?",
+    options: ["Vanshika","Me","bestfriend"],
+    correctAnswer: 2 // You
+  },
+];
+
+/* ========== Circular Carousel Setup ========== */
+(function setupCarousel(){
+  const carousel = document.getElementById('carousel');
+  const cards = Array.from(carousel.children);
+  const total = cards.length;
+  const radius = 500; // Radius of the circular path
+  const centerX = 0; // Center X position (relative to carousel)
+  const centerY = 0; // Center Y position (relative to carousel)
+  
+  // Position each card in a circle
+  cards.forEach((card, i) => {
+    const angle = (i / total) * Math.PI * 2;
+    const x = centerX + Math.cos(angle) * radius;
+    const z = Math.sin(angle) * radius;
+    const rotateY = (i / total) * 360;
+    
+    card.style.transform = `translateX(${x}px) translateZ(${z}px) rotateY(${rotateY}deg)`;
+    
+    // Adjust scale based on Z position to create depth
+    const scale = 0.8 + (z + radius) / (2 * radius) * 0.4;
+    card.style.transform += ` scale(${scale})`;
+    
+    // Adjust opacity based on Z position
+    const opacity = 0.6 + (z + radius) / (2 * radius) * 0.4;
+    card.style.opacity = opacity;
+  });
+})();
+
+/* ========== Stars and Rain Effects ========== */
+function createStars() {
+  const starsContainer = document.getElementById('stars');
+  const starCount = 80;
+  
+  for (let i = 0; i < starCount; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    const size = 0.5 + Math.random() * 1.5;
+    star.style.width = `${size}px`;
+    star.style.height = `${size}px`;
+    star.style.left = `${Math.random() * 100}vw`;
+    star.style.top = `${Math.random() * 100}vh`;
+    star.style.animationDelay = `${Math.random() * 4}s`;
+    star.style.animationDuration = `${3 + Math.random() * 5}s`;
+    starsContainer.appendChild(star);
+  }
+}
+
+function createRain() {
+  const rainContainer = document.getElementById('raindrops');
+  const dropCount = 60;
+  
+  for (let i = 0; i < dropCount; i++) {
+    const drop = document.createElement('div');
+    drop.className = 'raindrop';
+    const length = 15 + Math.random() * 25;
+    drop.style.height = `${length}px`;
+    drop.style.left = `${Math.random() * 100}vw`;
+    drop.style.top = `${Math.random() * -100}vh`;
+    drop.style.animationDuration = `${3 + Math.random() * 3}s`;
+    drop.style.animationDelay = `${Math.random() * 4}s`;
+    rainContainer.appendChild(drop);
+  }
+}
+
+/* ========== Quiz Logic ========== */
+const quizContainer = document.getElementById('quizContainer');
+const questionText = document.getElementById('questionText');
+const optionsContainer = document.getElementById('optionsContainer');
+const nextQuestionBtn = document.getElementById('nextQuestionBtn');
+const submitQuizBtn = document.getElementById('submitQuizBtn');
+const retryBtn = document.getElementById('retryBtn');
+const scoreDisplay = document.getElementById('scoreDisplay');
+const resultMessage = document.getElementById('resultMessage');
+
+let currentQuestion = 0;
+let score = 0;
+let selectedOption = null;
+
+function startQuiz() {
+  quizContainer.style.display = 'block';
+  currentQuestion = 0;
+  score = 0;
+  loadQuestion();
+}
+
+function loadQuestion() {
+  const question = quizQuestions[currentQuestion];
+  questionText.textContent = question.question;
+  optionsContainer.innerHTML = '';
+  
+  question.options.forEach((option, index) => {
+    const optionElement = document.createElement('div');
+    optionElement.className = 'option';
+    optionElement.textContent = option;
+    optionElement.dataset.index = index;
+    optionElement.addEventListener('click', selectOption);
+    optionsContainer.appendChild(optionElement);
+  });
+  
+  nextQuestionBtn.disabled = true;
+  nextQuestionBtn.style.display = 'block';
+  submitQuizBtn.style.display = 'none';
+  retryBtn.style.display = 'none';
+  scoreDisplay.textContent = `Score: ${score}/${quizQuestions.length}`;
+}
+
+function selectOption(e) {
+  // Remove selected class from all options
+  document.querySelectorAll('.option').forEach(opt => {
+    opt.classList.remove('selected');
+  });
+  
+  // Add selected class to clicked option
+  const selected = e.target;
+  selected.classList.add('selected');
+  selectedOption = parseInt(selected.dataset.index);
+  nextQuestionBtn.disabled = false;
+}
+
+function checkAnswer() {
+  const correctAnswer = quizQuestions[currentQuestion].correctAnswer;
+  if (selectedOption === correctAnswer) {
+    score++;
+    scoreDisplay.textContent = `Score: ${score}/${quizQuestions.length}`;
+  }
+}
+
+function showNextQuestion() {
+  checkAnswer();
+  currentQuestion++;
+  
+  if (currentQuestion < quizQuestions.length - 1) {
+    loadQuestion();
+  } else if (currentQuestion === quizQuestions.length - 1) {
+    // Last question
+    loadQuestion();
+    nextQuestionBtn.style.display = 'none';
+    submitQuizBtn.style.display = 'block';
+  }
+}
+
+function submitQuiz() {
+  checkAnswer();
+  showResult();
+}
+
+function showResult() {
+  if (score == 3) {
+    resultMessage.innerHTML = `Wow you did it! 🎉<br>You scored ${score}/8!`;
+    submitQuizBtn.style.display = 'none';
+    retryBtn.style.display = 'none';
+    // Show the final content after successful quiz
+    setTimeout(() => {
+      quizContainer.style.display = 'none';
+      document.getElementById('musicArea').style.display = 'flex';
+    }, 2000);
+  } else {
+    resultMessage.innerHTML = `You don't know me well enough 😢<br>You scored ${score}/8. Try again!`;
+    submitQuizBtn.style.display = 'none';
+    retryBtn.style.display = 'block';
+  }
+}
+
+function retryQuiz() {
+  startQuiz();
+}
+
+nextQuestionBtn.addEventListener('click', showNextQuestion);
+submitQuizBtn.addEventListener('click', submitQuiz);
+retryBtn.addEventListener('click', retryQuiz);
+
+/* ========== Envelope / Shayari logic ========== */
+const shayariCard = document.getElementById('shayariCard');
+const nextBtn = document.getElementById('nextBtn');
+const prevBtn = document.getElementById('prevBtn');
+const musicArea = document.getElementById('musicArea');
+const playMusicBtn = document.getElementById('playMusicBtn');
+const audio = document.getElementById('audio');
+const heartsContainer = document.getElementById('hearts');
+const finalNav = document.getElementById('finalNav');
+
+let current = -1;
+let revealedCount = 0;
+
+function showShayariWithAnimation(index) {
+  if(index < 0 || index >= shayaris.length) return;
+  
+  // Create new letter element
+  const letterContainer = document.createElement('div');
+  letterContainer.className = 'letter-container';
+  
+  const letter = document.createElement('div');
+  letter.className = 'letter';
+  letter.textContent = shayaris[index];
+  
+  letterContainer.appendChild(letter);
+  
+  // Replace the existing letter
+  const currentLetter = shayariCard.querySelector('.letter-container');
+  shayariCard.replaceChild(letterContainer, currentLetter);
+}
+
+nextBtn.addEventListener('click', ()=>{
+  // Stop music if playing
+  if (!audio.paused) {
+    audio.pause();
+    audio.currentTime = 0;
+    stopHearts();
+    playMusicBtn.disabled = false;
+    playMusicBtn.textContent = 'Play';
+    finalNav.style.display = 'none';
+  }
+
+  if(current < shayaris.length - 1){
+    current++;
+    showShayariWithAnimation(current);
+    revealedCount = Math.max(revealedCount, current+1);
+    prevBtn.disabled = (current <= 0);
+    if(current === shayaris.length - 1){
+      setTimeout(()=> {
+        // Start the quiz instead of showing music area directly
+        startQuiz();
+        nextBtn.disabled = true;
+        prevBtn.disabled = false;
+      }, 600);
+    }
+  } else {
+    nextBtn.disabled = true;
+  }
+});
+
+prevBtn.addEventListener('click', ()=>{
+  if(current > 0){
+    current--;
+    showShayariWithAnimation(current);
+    nextBtn.disabled = false;
+    prevBtn.disabled = (current === 0);
+    if(musicArea.style.display === 'flex'){
+      musicArea.style.display = 'none';
+      audio.pause(); audio.currentTime = 0;
+      stopHearts();
+      finalNav.style.display = 'none';
+    }
+  }
+});
+
+/* ========== Music controls & hearts animation ========== */
+let heartsRunning = false;
+let heartInterval = null;
+
+function createHeart(){
+  const h = document.createElement('div');
+  h.className = 'heart';
+  const stageRect = document.getElementById('stage').getBoundingClientRect();
+  const minX = stageRect.left + 40;
+  const maxX = stageRect.right - 40;
+  const x = Math.random() * (maxX - minX) + minX;
+  const size = 12 + Math.random()*22;
+  h.style.left = x + 'px';
+  h.style.bottom = Math.random()*40 + 10 + 'px';
+  h.style.width = size + 'px';
+  h.style.height = size + 'px';
+  h.style.animationDuration = (3.5 + Math.random()*2) + 's';
+  heartsContainer.appendChild(h);
+  setTimeout(()=> { h.remove(); }, 7000);
+}
+
+function startHearts(){
+  if(heartsRunning) return;
+  heartsRunning = true;
+  for(let i=0;i<8;i++) setTimeout(createHeart, i*120);
+  heartInterval = setInterval(()=> { createHeart(); }, 600);
+}
+
+function stopHearts(){
+  heartsRunning = false;
+  clearInterval(heartInterval);
+  heartInterval = null;
+  heartsContainer.querySelectorAll('.heart').forEach(h=>h.remove());
+}
+
+playMusicBtn.addEventListener('click', async ()=>{
+  startHearts();
+  try {
+    await audio.play();
+    playMusicBtn.disabled = true;
+    playMusicBtn.textContent = 'Playing...';
+  } catch(e){ console.warn('Playback blocked, user gesture required.'); }
+});
+
+document.getElementById('stopMusicBtn').addEventListener('click', ()=>{
+  audio.pause();
+  audio.currentTime = 0;
+  stopHearts();
+  playMusicBtn.disabled = false;
+  playMusicBtn.textContent = 'Play';
+});
+
+audio.addEventListener('ended', ()=>{ stopHearts(); });
+audio.addEventListener('play', ()=> { startHearts(); });
+
+/* ========== Initialize Effects ========== */
+createStars();
+createRain();
+
+/* ========== small UX niceties ========== */
+prevBtn.style.display = 'inline-block';
+prevBtn.disabled = true;
+
+window.addEventListener('resize', ()=> {});
+</script>
+</body>
+</html>

@@ -500,18 +500,23 @@ let countdownInterval;
 let celebrationStarted = false;
 
 // Set countdown to start from 5 seconds
-let countdownTime = {
-  hours: 0,
-  minutes: 0,
-  seconds: 5
-};
+let countdownSeconds = 5;
 
 function updateClock() {
   // Update the countdown time
-  countdownTime.seconds--;
+  countdownSeconds--;
+  
+  // Update clock display
+  clockTime.textContent = countdownSeconds;
+  
+  // Play tick sound on every second change
+  try {
+    tickSound.currentTime = 0;
+    tickSound.play();
+  } catch(e) {}
   
   // Check if countdown has reached zero
-  if (countdownTime.seconds < 0) {
+  if (countdownSeconds <= 0) {
     if (!celebrationStarted) {
       celebrateBirthday();
       celebrationStarted = true;
@@ -520,18 +525,6 @@ function updateClock() {
     clearInterval(countdownInterval);
     return;
   }
-  
-  // Format time with leading zeros
-  const formattedTime = 
-    `${countdownTime.hours.toString().padStart(2, '0')}:${countdownTime.minutes.toString().padStart(2, '0')}:${countdownTime.seconds.toString().padStart(2, '0')}`;
-  
-  clockTime.textContent = formattedTime;
-  
-  // Play tick sound on every second change
-  try {
-    tickSound.currentTime = 0;
-    tickSound.play();
-  } catch(e) {}
 }
 
 function celebrateBirthday() {
@@ -553,26 +546,30 @@ function celebrateBirthday() {
   createConfetti();
   createBalloons();
   
+  // Play cheer sound automatically when timer ends
+  try{ 
+    cheerSfx.currentTime = 0;
+    cheerSfx.play().then(() => {
+      console.log("Cheer sound started successfully");
+    }).catch(error => {
+      console.log("Cheer sound failed to play:", error);
+      // Try again with user interaction fallback
+      document.addEventListener('click', () => {
+        cheerSfx.play().catch(e => console.log("Cheer sound still failed:", e));
+      }, { once: true });
+    });
+  } catch(e){
+    console.log("Error playing cheer sound:", e);
+  }
+  
   // enable typewriter + celebratory fireworks
   typingEnabled = true;
   spawnFireworkBurst(window.innerWidth*0.2, window.innerHeight*0.3, 1.6);
   spawnFireworkBurst(window.innerWidth*0.8, window.innerHeight*0.3, 1.6);
   
-  // Play sound effects
-  try{ 
-    cheerSfx.currentTime = 0;
-    cheerSfx.play();
-    setTimeout(() => {
-      try {
-        cheerSfx.pause();
-        cheerSfx.currentTime = 0;
-      } catch(e) {}
-    }, 3000);
-  } catch(e){}
-  
   sparkleBurstAround(birthdayMessage, 26);
   
-  // Show buttons after 3 seconds - UPDATED CODE
+  // Show buttons after 3 seconds
   setTimeout(() => {
     buttonsBelow.style.display = 'flex';
     setTimeout(() => {
